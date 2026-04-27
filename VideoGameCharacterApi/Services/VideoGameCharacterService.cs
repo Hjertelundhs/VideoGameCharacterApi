@@ -1,12 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VideoGameCharacterApi.Data;
+using VideoGameCharacterApi.Dtos;
 using VideoGameCharacterApi.Models;
 
 namespace VideoGameCharacterApi.Services
 {
     public class VideoGameCharacterService(AppDbContext context) : IVideoGameCharacterService
     {
-        public Task<Character> AddCharacterAsync(Character character)
+        public Task<CharacterResponse> AddCharacterAsync(Character character)
         {
             throw new NotImplementedException();
         }
@@ -16,11 +17,24 @@ namespace VideoGameCharacterApi.Services
             throw new NotImplementedException();
         }
 
-        public async Task<List<Character>> GetAllCharactersAsync() => await context.Characters.ToListAsync();
-
-        public async Task<Character?> GetCharacterByIdAsync(int id)
+        public async Task<List<CharacterResponse>> GetAllCharactersAsync() => await context.Characters.Select(c => new CharacterResponse
         {
-            var result = await context.Characters.FindAsync(id);
+            Name = c.Name,
+            Game = c.Game,
+            Role = c.Role
+        }).ToListAsync();
+
+        public async Task<CharacterResponse?> GetCharacterByIdAsync(int id)
+        {
+            var result = await context.Characters
+                .Where(c => c.Id == id)
+                .Select(c => new CharacterResponse
+                {
+                    Name = c.Name,
+                    Game = c.Game,
+                    Role = c.Role
+                })
+                .FirstOrDefaultAsync();
             return result;
         }
 
